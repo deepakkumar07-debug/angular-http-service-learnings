@@ -256,3 +256,15 @@ all these methods are leading with ng
 - OnChanges
 - DoCheck
 - AfterContentInit
+## Separation of concerns
+responsible
+Our class should have a single responsibility
+- A class that does too many things voilates Separation of concerns - principle
+- then such a class is hard to maintain and hard to test
+**Solution**
+- create another class all it as service 
+- this class is purely responsible for working with backend
+- update post delete post all thing goes here api url
+- in future any changes there is only one place we need to change
+- all details working with backend is encapuslated in one place which service file
+- we can reuse this in multiple places
