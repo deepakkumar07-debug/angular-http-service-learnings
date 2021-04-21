@@ -37,6 +37,27 @@ export class PostsComponent implements OnInit {
       console.log('posted data',response['id']);
     })
    } 
+
+   updatePosts(post){
+     let index=this.posts.indexOf(post);
+    //  let updatedPost={title:"Post On C#"};
+     post['title']="Post On C++";
+    //  instead of using /post
+    // use specific /post/1
+    //  use for only if few properties need to be update
+     this.http.patch(this.apiUrl + '/' + post.id,JSON.stringify(post))
+     .subscribe(response=>{
+      //  updatedPost['id']=response['id']
+      //  updatedPost['id']=response['id']
+       console.log("Patch",response);
+      //  this.posts.splice(index,0,updatedPost);
+       this.posts.splice(index,1,post);
+      // console.log('after',updatedPost);
+      console.log('after',post);
+     })
+    //  use this for to update entire object
+    //  this.http.put(this.apiUrl,JSON.stringify(post));
+   }
   // getData(){
   //   return this.http.get(this.apiUrl);
   // }
