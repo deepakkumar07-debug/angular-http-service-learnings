@@ -10,16 +10,7 @@ export class PostsComponent implements OnInit {
   posts;
 //posts: any[];
   private apiUrl='https://jsonplaceholder.typicode.com/posts';
-  constructor(private http:HttpClient) {
-    // http.get(this.apiUrl);//return type is observable of response
-    http.get(this.apiUrl).subscribe(response=>{
-      // console.log(response)
-      this.posts=response;
-      console.log("posts",this.posts);
-      
-      // console.log(response[0])
-    })
-   }
+  constructor(private http:HttpClient) {}
   //  to make understandable we say its a html input element not string
   // also improve compile time checking
    createPost(input:HTMLInputElement){
@@ -58,10 +49,30 @@ export class PostsComponent implements OnInit {
     //  use this for to update entire object
     //  this.http.put(this.apiUrl,JSON.stringify(post));
    }
+
+   deletePost(post){
+     let index=this.posts.indexOf(post);
+
+     this.http.delete(this.apiUrl +'/' +post.id)//here we dont have body of the request
+     .subscribe(response=>{
+       this.posts.splice(index,1);
+      //  doesnot return anything
+      console.log('removed',response)
+     })
+
+   }
   // getData(){
   //   return this.http.get(this.apiUrl);
   // }
   ngOnInit(): void {
+      // http.get(this.apiUrl);//return type is observable of response
+      this.http.get(this.apiUrl).subscribe(response=>{
+        // console.log(response)
+        this.posts=response;
+        console.log("posts",this.posts);
+        
+        // console.log(response[0])
+      })
   }
 
 }

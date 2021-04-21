@@ -211,3 +211,48 @@ export class PostsComponent implements OnInit {
 }
 
 ```
+
+## Deleting data
+```js
+  deletePost(post){
+     let index=this.posts.indexOf(post);
+
+     this.http.delete(this.apiUrl +'/' +post.id)//here we dont have body of the request
+     .subscribe(response=>{
+       this.posts.splice(index,1);
+      //  doesnot return anything
+      console.log('removed',response)
+     })
+
+   }
+```
+```html
+<div class="container">
+    <!-- keyupEvent.filter -->
+    <!-- when user presses enter we gonna call createPost() method -->
+    <!-- as an argument to this input method we gonna pass input field reference -->
+    <!-- so we create template reference variable with leading # -->
+    <input (keyup.enter)="createPost(title)" #title type="text" class="form-control">
+    <ul class="list-group">
+        <li *ngFor="let post of posts"
+        class="list-group-item">
+        <button 
+            class="btn btn-info btn-sm mr-4"
+            (click)="updatePosts(post)"
+            >Update</button>
+            <button 
+            class="btn btn-danger btn-sm mr-4"
+            (click)="deletePost(post)"
+            >delete</button>
+                {{post.title}}
+        </li>
+    </ul>
+</div>
+```
+
+## lifecycle hooks
+all these methods are leading with ng
+- OnInit defdined in  OnInit interface
+- OnChanges
+- DoCheck
+- AfterContentInit
