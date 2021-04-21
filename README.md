@@ -1,6 +1,12 @@
 # AngularHttpServiceLearnings
 https://jsonplaceholder.typicode.com/
 
+## HTTp Requests
+GET => Get Data
+POST => Create Data
+PUT => Update data
+DELETE => Delete data
+
 ## Getting data
 https://jsonplaceholder.typicode.com/posts
 
@@ -68,6 +74,69 @@ export class PostsComponent implements OnInit {
 `app.component.html`
 ```html
 <div class="container">
+    <ul class="list-group">
+        <li *ngFor="let post of posts"
+        class="list-group-item">
+                {{post.title}}
+        </li>
+    </ul>
+</div>
+```
+## Creating Data 
+when creating http post request body of the request is json object thats the object we want send data to the server.
+
+```js
+import { HttpClient } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'posts',
+  templateUrl: './posts.component.html',
+  styleUrls: ['./posts.component.css']
+})
+export class PostsComponent implements OnInit {
+  posts;
+  private apiUrl='https://jsonplaceholder.typicode.com/posts';
+  constructor(private http:HttpClient) {
+    // http.get(this.apiUrl);//return type is observable of response
+    http.get(this.apiUrl).subscribe(response=>{
+      // console.log(response)
+      this.posts=response;
+      console.log("posts",this.posts);
+      // console.log(response[0])
+    })
+   }
+  //  to make understandable we say its a html input element not string
+  // also improve compile time checking
+   createPost(input:HTMLInputElement){
+    //  we cant use http reference here because its inside constructor 
+    // if we want to use we give private modifier so that it will private to the class
+    // let post:any ={title:input.value};//this is javascript object we know to convert js obj to Json object
+    let post ={title:input.value};//this is javascript object we know to convert js obj to Json object
+    input.value='';
+    this.http.post(this.apiUrl,JSON.stringify(post))
+    .subscribe(response=>{
+      post['id']=response['id'];
+      // console.log('posted data',response);
+      this.posts.splice(0,0,post);//add at begiing of array first zero postion ,second zero no delete, element want to place
+      console.log('posted data',response['id']);
+    })
+   } 
+ 
+  ngOnInit(): void {
+  }
+
+}
+
+```
+
+```html
+<div class="container">
+    <!-- keyupEvent.filter -->
+    <!-- when user presses enter we gonna call createPost() method -->
+    <!-- as an argument to this input method we gonna pass input field reference -->
+    <!-- so we create template reference variable with leading # -->
+    <input (keyup.enter)="createPost(title)" #title type="text" class="form-control">
     <ul class="list-group">
         <li *ngFor="let post of posts"
         class="list-group-item">

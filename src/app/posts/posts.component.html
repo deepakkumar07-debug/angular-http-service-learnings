@@ -1,4 +1,9 @@
 <div class="container">
+    <!-- keyupEvent.filter -->
+    <!-- when user presses enter we gonna call createPost() method -->
+    <!-- as an argument to this input method we gonna pass input field reference -->
+    <!-- so we create template reference variable with leading # -->
+    <input (keyup.enter)="createPost(title)" #title type="text" class="form-control">
     <ul class="list-group">
         <li *ngFor="let post of posts"
         class="list-group-item">
