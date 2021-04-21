@@ -1,5 +1,5 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { PostService } from '../services/post.service';
 
 @Component({
   selector: 'posts',
@@ -9,8 +9,7 @@ import { Component, OnInit } from '@angular/core';
 export class PostsComponent implements OnInit {
   posts;
 //posts: any[];
-  private apiUrl='https://jsonplaceholder.typicode.com/posts';
-  constructor(private http:HttpClient) {}
+  constructor(private service:PostService) {}
   //  to make understandable we say its a html input element not string
   // also improve compile time checking
    createPost(input:HTMLInputElement){
@@ -19,7 +18,7 @@ export class PostsComponent implements OnInit {
     // let post:any ={title:input.value};//this is javascript object we know to convert js obj to Json object
     let post ={title:input.value};//this is javascript object we know to convert js obj to Json object
     input.value='';
-    this.http.post(this.apiUrl,JSON.stringify(post))
+    this.service.createPost(post)
     .subscribe(response=>{
       // post.id=response;
       post['id']=response['id'];
@@ -36,7 +35,7 @@ export class PostsComponent implements OnInit {
     //  instead of using /post
     // use specific /post/1
     //  use for only if few properties need to be update
-     this.http.patch(this.apiUrl + '/' + post.id,JSON.stringify(post))
+    this.service.updatePost(post)
      .subscribe(response=>{
       //  updatedPost['id']=response['id']
       //  updatedPost['id']=response['id']
@@ -52,8 +51,7 @@ export class PostsComponent implements OnInit {
 
    deletePost(post){
      let index=this.posts.indexOf(post);
-
-     this.http.delete(this.apiUrl +'/' +post.id)//here we dont have body of the request
+    this.service.deletePost(post['id'])
      .subscribe(response=>{
        this.posts.splice(index,1);
       //  doesnot return anything
@@ -66,7 +64,8 @@ export class PostsComponent implements OnInit {
   // }
   ngOnInit(): void {
       // http.get(this.apiUrl);//return type is observable of response
-      this.http.get(this.apiUrl).subscribe(response=>{
+      this.service.getPosts()
+        .subscribe(response=>{
         // console.log(response)
         this.posts=response;
         console.log("posts",this.posts);
