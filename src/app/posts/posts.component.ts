@@ -19,12 +19,18 @@ export class PostsComponent implements OnInit {
     let post ={title:input.value};//this is javascript object we know to convert js obj to Json object
     input.value='';
     this.service.createPost(post)
-    .subscribe(response=>{
+    .subscribe(
+      response=>{
       // post.id=response;
       post['id']=response['id'];
       // console.log('posted data',response);
       this.posts.splice(0,0,post);//add at begiing of array first zero postion ,second zero no delete, element want to place
       console.log('posted data',response['id']);
+    },
+    error=>{
+      alert('something went wrong')
+      console.log("CreatePostError",error);
+      
     })
    } 
 
@@ -44,6 +50,9 @@ export class PostsComponent implements OnInit {
        this.posts.splice(index,1,post);
       // console.log('after',updatedPost);
       console.log('after',post);
+     },error=>{
+       console.log("updatepostError",error);
+       
      })
     //  use this for to update entire object
     //  this.http.put(this.apiUrl,JSON.stringify(post));
@@ -52,10 +61,14 @@ export class PostsComponent implements OnInit {
    deletePost(post){
      let index=this.posts.indexOf(post);
     this.service.deletePost(post['id'])
-     .subscribe(response=>{
+     .subscribe(
+       response=>{
        this.posts.splice(index,1);
       //  doesnot return anything
       console.log('removed',response)
+     },error=>{
+       console.log("deleteError",error);
+       
      })
 
    }
@@ -64,6 +77,14 @@ export class PostsComponent implements OnInit {
   // }
   ngOnInit(): void {
       // http.get(this.apiUrl);//return type is observable of response
+      // this.service.getPosts().toPromise().then((data)=>console.log("data",data[0]['id']))
+      // this.service.getPosts()
+      // .then((data) => {
+      //   console.log("data",data);
+      // })
+      // .then((data) => {
+      //   console.log("data",JSON.stringify(data));
+      // })
       this.service.getPosts()
         .subscribe(response=>{
         // console.log(response)
@@ -71,6 +92,8 @@ export class PostsComponent implements OnInit {
         console.log("posts",this.posts);
         
         // console.log(response[0])
+      },error=>{
+        console.log(error);
       })
   }
 

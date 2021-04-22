@@ -268,3 +268,31 @@ Our class should have a single responsibility
 - in future any changes there is only one place we need to change
 - all details working with backend is encapuslated in one place which service file
 - we can reuse this in multiple places
+
+## genrate service using cli
+        ng g s post
+
+- then add PostService in providers array
+- then make servies folder and move all post.service files in services
+-       cd src/app
+        mkdir services
+        mv post.service.* services
+    
+## observables
+- Observables provide support for passing messages between parts of your application
+- The observer pattern is a software design pattern in which an object, called the subject, maintains a list of its dependents, called observers, and notifies them automatically of state changes.
+- 
+
+
+## Handling errors
+unexpected error 
+  - Server is offline
+  - Network is down
+  - Unhandled exceptions => server is up and running we call the server because somebug it fails
+ 
+expected  error
+2 types of errors 
+Not found
+  404 error
+Bad request
+  400

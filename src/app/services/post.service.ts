@@ -6,10 +6,11 @@ import { Injectable } from '@angular/core';
 })
 export class PostService {
   private apiUrl='https://jsonplaceholder.typicode.com/posts';
-
+  private apiUrl2='http://www.omdbapi.com/?apikey=dfe6d885&s=cars';
   constructor(private http:HttpClient) { }
 
   getPosts(){
+    // return this.http.get(this.apiUrl2).toPromise();
     return this.http.get(this.apiUrl);
   }
   createPost(post){
