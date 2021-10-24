@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 import { AppError } from '../common/app-errors';
 import { BadInput } from '../common/bad-input';
 import { NotFoundError } from '../common/not-found-error';
@@ -18,21 +18,29 @@ export class DataService {
   //  instead of getPosts getAll
   getAll() {
     // return this.http.get(this.apiUrl2).toPromise();
-    return this.http.get(this.url).pipe(catchError(this.handleError));
+    return this.http.get(this.url).pipe(
+      map((response) => response),
+      catchError(this.handleError)
+    );
   }
   create(resource) {
-    return this.http
-      .post(this.url, JSON.stringify(resource))
-      .pipe(catchError(this.handleError));
+    return this.http.post(this.url, JSON.stringify(resource)).pipe(
+      map((response) => response),
+      catchError(this.handleError)
+    );
   }
   update(resource) {
     return this.http
       .patch(this.url + '/' + resource.id, JSON.stringify(resource))
-      .pipe(catchError(this.handleError));
+      .pipe(
+        map((response) => response),
+        catchError(this.handleError)
+      );
   }
   //  delete always take id so we dont need to rename param
   delete(id) {
     return this.http.delete(this.url + '/' + id).pipe(
+      map((response) => response),
       catchError(this.handleError) // simply passing reference
     ); //here we dont have body of the request;
   }

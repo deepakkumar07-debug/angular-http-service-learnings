@@ -20,16 +20,21 @@ export class PostsComponent implements OnInit {
     // if we want to use we give private modifier so that it will private to the class
     // let post:any ={title:input.value};//this is javascript object we know to convert js obj to Json object
     let post = { title: input.value }; //this is javascript object we know to convert js obj to Json object
+    this.posts.splice(0, 0, post); // optimistic updates //add at begiing of array first zero postion ,second zero no delete, element want to place
+
     input.value = '';
+
     this.service.create(post).subscribe(
-      (response) => {
+      (newPost) => {
         // post.id=response;
-        post['id'] = response['id'];
+        // newPost.json()['id'];
+        post['id'] = newPost['id'];
         // console.log('posted data',response);
-        this.posts.splice(0, 0, post); //add at begiing of array first zero postion ,second zero no delete, element want to place
-        console.log('posted data', response['id']);
+        console.log('posted data', newPost['id']);
       },
       (error: AppError) => {
+        this.posts.splice(0, 1);
+
         if (error instanceof BadInput) {
           // this.form.setErrors(error.originalError);
         } else throw error;
@@ -44,10 +49,10 @@ export class PostsComponent implements OnInit {
     //  instead of using /post
     // use specific /post/1
     //  use for only if few properties need to be update
-    this.service.update(post).subscribe((response) => {
+    this.service.update(post).subscribe((updatedPost) => {
       //  updatedPost['id']=response['id']
       //  updatedPost['id']=response['id']
-      console.log('Patch', response);
+      console.log('Patch', updatedPost);
       //  this.posts.splice(index,0,updatedPost);
       this.posts.splice(index, 1, post);
       // console.log('after',updatedPost);
@@ -58,14 +63,17 @@ export class PostsComponent implements OnInit {
   }
 
   deletePost(post) {
+    let index = this.posts.indexOf(post);
+    this.posts.splice(index, 1);
+
     this.service.delete(post['id']).subscribe(
-      (response) => {
-        let index = this.posts.indexOf(post);
-        this.posts.splice(index, 1);
+      // we dont get any repsosne so empyt
+      () => {
         //  doesnot return anything
-        console.log('removed', response);
+        console.log('removed');
       },
       (error: AppError) => {
+        this.posts.splice(index, 0, post);
         if (error instanceof NotFoundError)
           alert('this post has already been deleted.');
         else throw error; // rethrow an error
@@ -85,9 +93,9 @@ export class PostsComponent implements OnInit {
     // .then((data) => {
     //   console.log("data",JSON.stringify(data));
     // })
-    this.service.getAll().subscribe((response) => {
+    this.service.getAll().subscribe((posts) => {
       // console.log(response)
-      this.posts = response;
+      this.posts = posts;
       console.log('posts', this.posts);
 
       // console.log(response[0])

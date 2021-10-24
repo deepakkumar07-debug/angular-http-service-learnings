@@ -809,3 +809,224 @@ export class PostsComponent implements OnInit {
   }
 }
 ```
+
+## The Map OPerator
+
+data service to cleanup posts componet http related logic
+
+`post-servicce`
+
+```ts
+import { Component, OnInit } from "@angular/core";
+import { AppError } from "../common/app-errors";
+import { BadInput } from "../common/bad-input";
+import { NotFoundError } from "../common/not-found-error";
+import { PostService } from "../services/post.service";
+
+@Component({
+  selector: "posts",
+  templateUrl: "./posts.component.html",
+  styleUrls: ["./posts.component.css"],
+})
+export class PostsComponent implements OnInit {
+  posts;
+  //posts: any[];
+  constructor(private service: PostService) {}
+  //  to make understandable we say its a html input element not string
+  // also improve compile time checking
+  createPost(input: HTMLInputElement) {
+    //  we cant use http reference here because its inside constructor
+    // if we want to use we give private modifier so that it will private to the class
+    // let post:any ={title:input.value};//this is javascript object we know to convert js obj to Json object
+    let post = { title: input.value }; //this is javascript object we know to convert js obj to Json object
+    input.value = "";
+    this.service.create(post).subscribe(
+      (newPost) => {
+        // post.id=response;
+        // newPost.json()['id'];
+        post["id"] = newPost["id"];
+        // console.log('posted data',response);
+        this.posts.splice(0, 0, post); //add at begiing of array first zero postion ,second zero no delete, element want to place
+        console.log("posted data", newPost["id"]);
+      },
+      (error: AppError) => {
+        if (error instanceof BadInput) {
+          // this.form.setErrors(error.originalError);
+        } else throw error;
+      }
+    );
+  }
+
+  updatePosts(post) {
+    let index = this.posts.indexOf(post);
+    //  let updatedPost={title:"Post On C#"};
+    post["title"] = "Post On C++";
+    //  instead of using /post
+    // use specific /post/1
+    //  use for only if few properties need to be update
+    this.service.update(post).subscribe((updatedPost) => {
+      //  updatedPost['id']=response['id']
+      //  updatedPost['id']=response['id']
+      console.log("Patch", updatedPost);
+      //  this.posts.splice(index,0,updatedPost);
+      this.posts.splice(index, 1, post);
+      // console.log('after',updatedPost);
+      console.log("after", post);
+    }); // we dont need to handle error here we did it in globally
+    //  use this for to update entire object
+    //  this.http.put(this.apiUrl,JSON.stringify(post));
+  }
+
+  deletePost(post) {
+    this.service.delete(post["id"]).subscribe(
+      // we dont get any repsosne so empyt
+      () => {
+        let index = this.posts.indexOf(post);
+        this.posts.splice(index, 1);
+        //  doesnot return anything
+        console.log("removed");
+      },
+      (error: AppError) => {
+        if (error instanceof NotFoundError)
+          alert("this post has already been deleted.");
+        else throw error; // rethrow an error
+      }
+    );
+  }
+  // getData(){
+  //   return this.http.get(this.apiUrl);
+  // }
+  ngOnInit(): void {
+    // http.get(this.apiUrl);//return type is observable of response
+    // this.service.getPosts().toPromise().then((data)=>console.log("data",data[0]['id']))
+    // this.service.getPosts()
+    // .then((data) => {
+    //   console.log("data",data);
+    // })
+    // .then((data) => {
+    //   console.log("data",JSON.stringify(data));
+    // })
+    this.service.getAll().subscribe((posts) => {
+      // console.log(response)
+      this.posts = posts;
+      console.log("posts", this.posts);
+
+      // console.log(response[0])
+    }); // we dont need to handle error here we did it in globally
+  }
+}
+```
+
+`data servie`
+
+```ts
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { Observable, throwError } from "rxjs";
+import { catchError, map, tap } from "rxjs/operators";
+import { AppError } from "../common/app-errors";
+import { BadInput } from "../common/bad-input";
+import { NotFoundError } from "../common/not-found-error";
+import { Inject } from "@angular/core";
+
+// import 'rxjs/add/observable/throw';
+//  we can even remove injectable and also @Inject(String) in constructor
+@Injectable({
+  providedIn: "root",
+})
+export class DataService {
+  //  this class gonnabe reusable so here we dont need intialization
+  constructor(@Inject(String) private url: string, private http: HttpClient) {}
+  //  instead of getPosts getAll
+  getAll() {
+    // return this.http.get(this.apiUrl2).toPromise();
+    return this.http.get(this.url).pipe(
+      map((response) => response),
+      catchError(this.handleError)
+    );
+  }
+  create(resource) {
+    return this.http.post(this.url, JSON.stringify(resource)).pipe(
+      map((response) => response),
+      catchError(this.handleError)
+    );
+  }
+  update(resource) {
+    return this.http
+      .patch(this.url + "/" + resource.id, JSON.stringify(resource))
+      .pipe(
+        map((response) => response),
+        catchError(this.handleError)
+      );
+  }
+  //  delete always take id so we dont need to rename param
+  delete(id) {
+    return this.http.delete(this.url + "/" + id).pipe(
+      map((response) => response),
+      catchError(this.handleError) // simply passing reference
+    ); //here we dont have body of the request;
+  }
+
+  private handleError(error: Response) {
+    if (error.status === 400)
+      return Observable.throw(new BadInput(error.json()));
+
+    if (error.status === 404) return throwError(new NotFoundError());
+
+    // return Observable.throw(new AppError(error));
+    return throwError(new AppError(error));
+  }
+}
+```
+
+## Optimistic vs Pesimistic Updates
+
+Hopeful Hopeless
+
+optimistic update will first update on ui if success on backend we leave it else will rollback to original state. nowadays lot of application uses this approach
+
+pesimistic call to backend server wait for response and update data if fails fails
+
+```ts
+  createPost(input: HTMLInputElement) {
+    let post = { title: input.value };
+    this.posts.splice(0, 0, post); // optimistic updates add at begiing of array first zero postion ,second zero no delete, element want to place
+
+    input.value = '';
+
+    this.service.create(post).subscribe(
+      (newPost) => {
+        post['id'] = newPost['id'];
+        console.log('posted data', newPost['id']);
+      },
+      (error: AppError) => {
+        this.posts.splice(0, 1); // if something goes wrong will delete
+
+
+        if (error instanceof BadInput) {
+          // this.form.setErrors(error.originalError);
+        } else throw error;
+      }
+    );
+  }
+
+  deletePost(post) {
+    let index = this.posts.indexOf(post);
+    this.posts.splice(index, 1);
+
+    this.service.delete(post['id']).subscribe(
+      // we dont get any repsosne so empyt
+      () => {
+        //  doesnot return anything
+        console.log('removed');
+      },
+      (error: AppError) => {
+        this.posts.splice(index, 0, post); // if something goes wrong will delete
+
+        if (error instanceof NotFoundError)
+          alert('this post has already been deleted.');
+        else throw error; // rethrow an error
+      }
+    );
+  }
+```
