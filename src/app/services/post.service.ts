@@ -5,7 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { AppError } from '../common/app-errors';
 import { BadInput } from '../common/bad-input';
 import { NotFoundError } from '../common/not-found-error';
-
+// import 'rxjs/add/observable/throw';
 @Injectable({
   providedIn: 'root',
 })
@@ -35,9 +35,11 @@ export class PostService {
   deletePost(id) {
     return this.http.delete(this.apiUrl + '/' + id).pipe(
       catchError((error: Response) => {
-        if (error.status === 404) return Observable.throw(new NotFoundError());
+        // if (error.status === 404) return Observable.throw(new NotFoundError());
+        if (error.status === 404) return throwError(new NotFoundError());
 
-        return Observable.throw(new AppError(error));
+        // return Observable.throw(new AppError(error));
+        return throwError(new AppError(error));
       })
     ); //here we dont have body of the request;
   }

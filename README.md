@@ -431,3 +431,5 @@ import { AppError } from "./app-errors";
 
 export class BadInput extends AppError {}
 ```
+
+## Importing Observable Operators and Factory Methods
