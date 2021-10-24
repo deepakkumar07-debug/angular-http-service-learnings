@@ -1030,3 +1030,69 @@ pesimistic call to backend server wait for response and update data if fails fai
     );
   }
 ```
+
+## Github Projec
+
+Create github-followers componnet
+
+    ng g c github-followers
+
+Service
+
+    ng g s github-followers
+
+`github-follower-service.ts`
+
+```ts
+import { DataService } from "./services/data.service";
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+
+@Injectable({
+  providedIn: "root",
+})
+export class GithubFollowersService extends DataService {
+  constructor(http: HttpClient) {
+    super("https://api.github.com/users/mosh-hamedani/", http);
+  }
+}
+```
+
+`github follower ts`
+
+```ts
+import { Component, OnInit } from "@angular/core";
+import { GithubFollowersService } from "../github-followers.service";
+
+@Component({
+  selector: "github-followers",
+  templateUrl: "./github-followers.component.html",
+  styleUrls: ["./github-followers.component.css"],
+})
+export class GithubFollowersComponent implements OnInit {
+  followers: any[];
+  constructor(private service: GithubFollowersService) {}
+
+  ngOnInit(): void {
+    this.service
+      .getAll()
+      .subscribe((followers: any) => (this.followers = followers));
+  }
+}
+```
+
+`githb follower.html`
+
+```html
+<div *ngFor="let follower of followers" class="media">
+  <img
+    class="avatar mr-3 mt-3"
+    src="{{ follower.avatar_url }}"
+    alt="Generic placeholder image"
+  />
+  <div class="media-body">
+    <h5 class="mt-0">{{ follower.login }}</h5>
+    <a href="{{ follower.html_url }}">{{ follower.html_url }}</a>
+  </div>
+</div>
+```
