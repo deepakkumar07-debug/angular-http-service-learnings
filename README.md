@@ -433,3 +433,135 @@ export class BadInput extends AppError {}
 ```
 
 ## Importing Observable Operators and Factory Methods
+
+## Global Error handling
+
+in post-service we repeated unexpected error logic
+now wew are going to handle that globaly becuase in futre we amy have many components
+
+create a file called `app/common/app-error-handler.ts`
+
+**head over to angular.io serach error handler**
+
+https://angular.io/api/core/ErrorHandler
+
+- If we look at the documentation we have a method called `handleError(error:any):void`.The defualt beahviour of this method is it just simply print the error in browser console.
+
+- now we need to provide different implemntation of this class
+- for our case we should display error to user and also log it in the console.
+- so we should remove all unexpected errors handled in `posts.component.ts`
+- and place it in our custom error handler
+
+`app/common/app-error-handler.ts`
+
+```ts
+// defualt handleError() will print it on console
+
+import { ErrorHandler } from "@angular/core";
+
+export class AppErrorHandler implements ErrorHandler {
+  handleError(error: any): void {
+    // throw new Error('Method not implemented.');
+
+    // In future instead of alert we can toast it to the user
+    // Instead of console.log log it in a server
+
+    alert("An unexpected error occured");
+    console.log("deleteError", error);
+  }
+}
+```
+
+- Then register this custom error on app.module.ts and instruct angular to take whenever http error happens take my custom Error handler class
+- place below code in providers array
+
+```ts
+  providers: [
+    PostService,
+    { provide: ErrorHandler, useClass: AppErrorHandler }, // this code
+  ],
+```
+
+- now clean up all unexpected code in posts.component.ts
+
+```ts
+import { Component, OnInit } from "@angular/core";
+import { AppError } from "../common/app-errors";
+import { BadInput } from "../common/bad-input";
+import { NotFoundError } from "../common/not-found-error";
+import { PostService } from "../services/post.service";
+
+@Component({
+  selector: "posts",
+  templateUrl: "./posts.component.html",
+  styleUrls: ["./posts.component.css"],
+})
+export class PostsComponent implements OnInit {
+  posts;
+  //posts: any[];
+  constructor(private service: PostService) {}
+  //  to make understandable we say its a html input element not string
+  // also improve compile time checking
+
+  ngOnInit(): void {
+    this.service.getPosts().subscribe((response) => {
+      this.posts = response;
+      console.log("posts", this.posts);
+    }); // we dont need to handle error here we did it in globally
+  }
+  createPost(input: HTMLInputElement) {
+    let post = { title: input.value }; //this is javascript object we know to convert js obj to Json object
+    input.value = "";
+    this.service.createPost(post).subscribe(
+      (response) => {
+        // post.id=response;
+        post["id"] = response["id"];
+        // console.log('posted data',response);
+        this.posts.splice(0, 0, post); //add at begiing of array first zero postion ,second zero no delete, element want to place
+        console.log("posted data", response["id"]);
+      },
+      (error: AppError) => {
+        if (error instanceof BadInput) {
+          // this.form.setErrors(error.originalError);
+        } else throw error;
+      }
+    );
+  }
+
+  updatePosts(post) {
+    let index = this.posts.indexOf(post);
+    //  let updatedPost={title:"Post On C#"};
+    post["title"] = "Post On C++";
+    //  instead of using /post
+    // use specific /post/1
+    //  use for only if few properties need to be update
+    this.service.updatePost(post).subscribe((response) => {
+      //  updatedPost['id']=response['id']
+      //  updatedPost['id']=response['id']
+      console.log("Patch", response);
+      //  this.posts.splice(index,0,updatedPost);
+      this.posts.splice(index, 1, post);
+      // console.log('after',updatedPost);
+      console.log("after", post);
+    }); // we dont need to handle error here we did it in globally
+    //  use this for to update entire object
+    //  this.http.put(this.apiUrl,JSON.stringify(post));
+  }
+
+  deletePost(post) {
+    this.service.deletePost(post["id"]).subscribe(
+      (response) => {
+        let index = this.posts.indexOf(post);
+        this.posts.splice(index, 1);
+        //  doesnot return anything
+        console.log("removed", response);
+      },
+      (error: AppError) => {
+        if (error instanceof NotFoundError)
+          alert("this post has already been deleted.");
+        else throw error; // rethrow an error
+      }
+    );
+  }
+}
+```

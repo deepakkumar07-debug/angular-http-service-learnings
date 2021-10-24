@@ -32,10 +32,7 @@ export class PostsComponent implements OnInit {
       (error: AppError) => {
         if (error instanceof BadInput) {
           // this.form.setErrors(error.originalError);
-        } else {
-          alert('An unexpected error occured');
-          console.log('CreatePostError', error);
-        }
+        } else throw error;
       }
     );
   }
@@ -47,20 +44,15 @@ export class PostsComponent implements OnInit {
     //  instead of using /post
     // use specific /post/1
     //  use for only if few properties need to be update
-    this.service.updatePost(post).subscribe(
-      (response) => {
-        //  updatedPost['id']=response['id']
-        //  updatedPost['id']=response['id']
-        console.log('Patch', response);
-        //  this.posts.splice(index,0,updatedPost);
-        this.posts.splice(index, 1, post);
-        // console.log('after',updatedPost);
-        console.log('after', post);
-      },
-      (error) => {
-        console.log('updatepostError', error);
-      }
-    );
+    this.service.updatePost(post).subscribe((response) => {
+      //  updatedPost['id']=response['id']
+      //  updatedPost['id']=response['id']
+      console.log('Patch', response);
+      //  this.posts.splice(index,0,updatedPost);
+      this.posts.splice(index, 1, post);
+      // console.log('after',updatedPost);
+      console.log('after', post);
+    }); // we dont need to handle error here we did it in globally
     //  use this for to update entire object
     //  this.http.put(this.apiUrl,JSON.stringify(post));
   }
@@ -76,10 +68,7 @@ export class PostsComponent implements OnInit {
       (error: AppError) => {
         if (error instanceof NotFoundError)
           alert('this post has already been deleted.');
-        else {
-          alert('An unexpected error occured');
-          console.log('deleteError', error);
-        }
+        else throw error; // rethrow an error
       }
     );
   }
@@ -96,17 +85,12 @@ export class PostsComponent implements OnInit {
     // .then((data) => {
     //   console.log("data",JSON.stringify(data));
     // })
-    this.service.getPosts().subscribe(
-      (response) => {
-        // console.log(response)
-        this.posts = response;
-        console.log('posts', this.posts);
+    this.service.getPosts().subscribe((response) => {
+      // console.log(response)
+      this.posts = response;
+      console.log('posts', this.posts);
 
-        // console.log(response[0])
-      },
-      (error) => {
-        console.log(error);
-      }
-    );
+      // console.log(response[0])
+    }); // we dont need to handle error here we did it in globally
   }
 }
