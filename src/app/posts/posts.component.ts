@@ -21,7 +21,7 @@ export class PostsComponent implements OnInit {
     // let post:any ={title:input.value};//this is javascript object we know to convert js obj to Json object
     let post = { title: input.value }; //this is javascript object we know to convert js obj to Json object
     input.value = '';
-    this.service.createPost(post).subscribe(
+    this.service.create(post).subscribe(
       (response) => {
         // post.id=response;
         post['id'] = response['id'];
@@ -44,7 +44,7 @@ export class PostsComponent implements OnInit {
     //  instead of using /post
     // use specific /post/1
     //  use for only if few properties need to be update
-    this.service.updatePost(post).subscribe((response) => {
+    this.service.update(post).subscribe((response) => {
       //  updatedPost['id']=response['id']
       //  updatedPost['id']=response['id']
       console.log('Patch', response);
@@ -58,7 +58,7 @@ export class PostsComponent implements OnInit {
   }
 
   deletePost(post) {
-    this.service.deletePost(post['id']).subscribe(
+    this.service.delete(post['id']).subscribe(
       (response) => {
         let index = this.posts.indexOf(post);
         this.posts.splice(index, 1);
@@ -85,7 +85,7 @@ export class PostsComponent implements OnInit {
     // .then((data) => {
     //   console.log("data",JSON.stringify(data));
     // })
-    this.service.getPosts().subscribe((response) => {
+    this.service.getAll().subscribe((response) => {
       // console.log(response)
       this.posts = response;
       console.log('posts', this.posts);
